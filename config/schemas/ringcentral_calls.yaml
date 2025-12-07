@@ -1,0 +1,26 @@
+id: ringcentral_calls
+source_system: ringcentral
+dataset_name: calls
+version: "1.0"
+
+description: "RingCentral call records dashboard export (Excel format)."
+
+file_patterns:
+  - "Call_Records_Dashboard*.xlsx"
+  - "call_records_dashboard*.xlsx"   # por si hay variación en mayúsculas
+
+allow_extra_columns: true
+
+required_columns:
+  - From Name
+  - From Number
+  - To Name
+  - To Number
+  - Date-Time
+  - Length
+  - Direction
+  - Call Type
+  - Call Response
+  - Result
+
+optional_columns: []

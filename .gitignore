@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# Datalake physical data (never commit PHI)
+datalake/drop_zone/
+datalake/raw/
+datalake/processed/
+datalake/curated/
+
+# VSCode
+.vscode/

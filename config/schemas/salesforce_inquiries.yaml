@@ -1,0 +1,43 @@
+id: salesforce_inquiries
+source_system: salesforce
+dataset_name: inquiries
+version: "1.0"
+
+description: "Salesforce inquiries/leads export (CSV format)."
+
+file_patterns:
+  - "inquiries*.csv"
+  - "inquiry*.csv"
+
+expected_delimiter: ","
+expected_encoding: "utf-8"
+allow_extra_columns: true
+
+required_columns:
+  - Lead Record Type
+  - Created Date Time
+  - Franchise Digit 1
+  - Franchise Digit 2
+  - Franchise Digit 3
+  - Franchise Digit 4
+  - Franchise #
+  - First Activity DateTime
+  - Last Activity Date
+  - Last Modified By
+  - Created By
+  - First Name
+  - Last Name
+  - Company / Account
+  - Lead Source
+  - Rating
+  - Lead Owner
+  - Lead Status
+  - Converted
+  - Loss Reason
+  - Source - Specific
+  - 2nd Source
+  - 2nd Source - Specific
+  - RPN Account
+  - RPN Contact
+
+optional_columns: []

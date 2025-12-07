@@ -1,0 +1,38 @@
+id: wellsky_carelogs
+source_system: wellsky
+dataset_name: carelogs
+version: "1.0"
+
+description: "WellSky care logs export (Excel format)."
+
+file_patterns:
+  - "care_logs*.xlsx"          # care_logs_12-05-2025-14-21-44.xlsx, care_logs by caregiver_*.xlsx
+
+allow_extra_columns: true
+
+required_columns:
+  - Client Last Name
+  - Client First Name
+  - Bill Rate Name
+  - Bill Total Hours
+  - Bill Rate Amount
+  - Bill Total
+  - Caregiver Name
+  - Caregiver Tags
+  - Status
+  - Pay Method
+  - Pay Rate Name
+  - Pay Total Hours
+  - Pay Rate Amount
+  - Pay Total
+  - Official Clock In Date
+  - Official Clock In Time
+  - Official Clock Out Date
+  - Official Clock Out Time
+  - Client Location
+  - Client Tags
+  - Caregiver ID
+  - Client ID
+  - Record ID
+
+optional_columns: []

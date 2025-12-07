@@ -1,0 +1,33 @@
+id: wellsky_clients
+source_system: wellsky
+dataset_name: clients
+version: "1.0"
+
+description: "WellSky clients master export (Excel format)."
+
+file_patterns:
+  - "clients_*.xlsx"          # clients_12-06-2025-11-59-21.xlsx, etc.
+
+allow_extra_columns: true     # Excel sometimes includes metadata columns
+
+required_columns:
+  - Tags
+  - Location
+  - Last Name
+  - First Name
+  - City
+  - Start Date
+  - First Carelog Date
+  - Last Carelog Date
+  - Date deactivated
+  - Deactivated
+  - Client Referrer
+  - Deactivation Reason
+  - Referral Source Type
+  - Client ID
+  - Address
+  - Address Line 2
+  - State
+  - Postal Code
+
+optional_columns: []

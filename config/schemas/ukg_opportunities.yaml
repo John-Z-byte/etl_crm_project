@@ -1,0 +1,29 @@
+id: ukg_opportunities
+source_system: ukg
+dataset_name: opportunities
+version: "1.0"
+
+description: "UKG job opportunities export (CSV format)."
+
+file_patterns:
+  - "opportunities.csv"
+  - "opportunities*.csv"     # por si algún día incluye fecha o variación
+
+expected_delimiter: ","
+expected_encoding: "utf-8"
+allow_extra_columns: true
+
+required_columns:
+  - Requisition Number
+  - Company Code
+  - Opportunity Title
+  - Job Family
+  - Location Name
+  - City
+  - Opportunity Status
+  - Created Date
+  - Closed Date
+  - Recruiter (Last, Suffix Preferred MI)
+  - Email Address (Recruiter)
+
+optional_columns: []

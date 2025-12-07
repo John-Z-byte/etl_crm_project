@@ -1,0 +1,30 @@
+id: wellsky_caregivers
+source_system: wellsky
+dataset_name: caregivers
+version: "1.0"
+
+description: "WellSky caregivers master export (Excel format)."
+
+file_patterns:
+  - "caregivers_*.xlsx"         # caregivers_12-04-2025-14-04-04.xlsx
+
+allow_extra_columns: true
+
+required_columns:
+  - Location
+  - Caregiver ID
+  - Last Name
+  - First Name
+  - City
+  - Caregiver Tags
+  - Date Of Birth
+  - Gender
+  - Hire Date
+  - First Care Log Date
+  - Last Care Log Date
+  - Termination Date
+  - Inactive
+  - Email
+  - Hours Wanted Weekly
+
+optional_columns: []

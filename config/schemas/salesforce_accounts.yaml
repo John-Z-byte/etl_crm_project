@@ -1,0 +1,28 @@
+id: salesforce_accounts
+source_system: salesforce
+dataset_name: accounts
+version: "1.0"
+
+description: "Salesforce accounts export (CSV format)."
+
+file_patterns:
+  - "accounts*.csv"
+  - "account*.csv"
+
+expected_delimiter: ","
+expected_encoding: "utf-8"
+allow_extra_columns: true
+
+required_columns:
+  - Created Date
+  - Type
+  - Account Name
+  - Account Owner
+  - Franchise #
+  - Last Activity Date
+  - Industry
+  - Billing City
+  - Billing State/Province
+  - RPN Status
+
+optional_columns: []

@@ -1,0 +1,32 @@
+id: wellsky_clock_methods
+source_system: wellsky
+dataset_name: clock_methods
+version: "1.0"
+
+description: "WellSky clock methods export (Excel format)."
+
+file_patterns:
+  - "care_logs*.xlsx"        # matching real files: care_logs_12-02-2025-11-50-13.xlsx
+
+allow_extra_columns: true
+
+required_columns:
+  - Record ID
+  - Client City
+  - Client Location
+  - Caregiver Location
+  - Client Name
+  - Client ID
+  - Caregiver Name
+  - Caregiver ID
+  - Official Clock In
+  - Official Clock Out
+  - Clock In - Method
+  - Clock Out - Method
+  - Clock In Point
+  - Clock Out Point
+  - Status
+  - Client Tags
+  - Caregiver Tags
+
+optional_columns: []

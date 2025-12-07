@@ -1,0 +1,36 @@
+id: salesforce_consults
+source_system: salesforce
+dataset_name: consults
+version: "1.0"
+
+description: "Salesforce care consult opportunities export (CSV format)."
+
+file_patterns:
+  - "consults*.csv"
+  - "consult*.csv"
+
+expected_delimiter: ","
+expected_encoding: "utf-8"
+allow_extra_columns: true
+
+required_columns:
+  - Care Consult Scheduled Date
+  - Close Date
+  - Franchise Digit 1
+  - Franchise Digit 2
+  - Franchise Digit 3
+  - Franchise Digit 4
+  - Franchise #
+  - Opportunity Name
+  - Opportunity Owner
+  - Account Name
+  - Stage
+  - Lead Source
+  - Type
+  - Won
+  - Loss Reason
+  - ClearCare Client URL
+  - RPN Account
+  - RPN Contact
+
+optional_columns: []

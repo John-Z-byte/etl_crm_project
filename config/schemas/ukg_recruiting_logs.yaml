@@ -1,0 +1,33 @@
+id: ukg_recruiting_logs
+source_system: ukg
+dataset_name: recruiting_logs
+version: "1.0"
+
+description: "UKG recruiting application step logs (CSV format)."
+
+file_patterns:
+  - "recruiting_logs.csv"
+  - "recruiting_logs*.csv"     # por si algún día incluyen fecha o variación
+
+expected_delimiter: ","
+expected_encoding: "utf-8"
+allow_extra_columns: true
+
+required_columns:
+  - Requisition Number
+  - Opportunity Title
+  - Application Id
+  - Source
+  - City
+  - Job Family
+  - Candidate (Last Suffix, First MI)
+  - Date Applied
+  - Status
+  - Step
+  - Step Date
+  - From Step
+  - To Step
+  - Step Change Date/Time
+  - Recruiter (Last, Suffix Preferred MI)
+
+optional_columns: []
