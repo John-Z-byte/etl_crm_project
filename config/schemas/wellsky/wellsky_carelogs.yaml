@@ -6,8 +6,12 @@ version: "1.0"
 description: "WellSky care logs export (Excel format)."
 
 file_patterns:
-  - "care_logs*.xlsx"          # care_logs_12-05-2025-14-21-44.xlsx, care_logs by caregiver_*.xlsx
+  # WIP – outside billing period (original system export names)
+  - "care_logs_*.xlsx"
+  - "care_logs_by_caregiver_*.xlsx"
 
+  # FINAL – billing period closed (standardized naming convention)
+  - "wellsky_carelogs_final_*_YYYY-MM_p??.xlsx"
 allow_extra_columns: true
 
 required_columns:
