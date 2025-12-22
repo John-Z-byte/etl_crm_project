@@ -6,8 +6,8 @@ version: "1.0"
 description: "Salesforce care consult opportunities export (CSV format)."
 
 file_patterns:
-  - "consults*.csv"
-  - "consult*.csv"
+  - "salesforce_consults*.csv"
+  - "salesforce_consult*.csv"
 
 expected_delimiter: ","
 expected_encoding: "utf-8"

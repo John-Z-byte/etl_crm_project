@@ -1,8 +1,0 @@
-env: "dev"
-
-paths:
-  datalake_root: "datalake"
-  drop_zone: "datalake/drop_zone"
-  raw: "datalake/raw"
-  processed: "datalake/processed"
-  curated: "datalake/curated"

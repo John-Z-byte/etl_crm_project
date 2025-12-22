@@ -6,8 +6,8 @@ version: "1.0"
 description: "Salesforce inquiries/leads export (CSV format)."
 
 file_patterns:
-  - "inquiries*.csv"
-  - "inquiry*.csv"
+  - "salesforce_inquiries*.csv"
+  - "salesforce_inquiry*.csv"
 
 expected_delimiter: ","
 expected_encoding: "utf-8"

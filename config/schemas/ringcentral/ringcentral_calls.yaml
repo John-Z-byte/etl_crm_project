@@ -6,8 +6,7 @@ version: "1.0"
 description: "RingCentral call records dashboard export (Excel format)."
 
 file_patterns:
-  - "Call_Records_Dashboard*.xlsx"
-  - "call_records_dashboard*.xlsx"   # por si hay variación en mayúsculas
+  - "ringcentral_calls_records_\\d{4}-\\d{2}\\.xlsx"
 
 allow_extra_columns: true
 

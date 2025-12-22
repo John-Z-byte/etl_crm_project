@@ -6,8 +6,8 @@ version: "1.0"
 description: "UKG job opportunities export (CSV format)."
 
 file_patterns:
-  - "opportunities.csv"
-  - "opportunities*.csv"     # por si algún día incluye fecha o variación
+  - "ukg_opportunities.csv"
+  - "ukg_opportunities*.csv"
 
 expected_delimiter: ","
 expected_encoding: "utf-8"

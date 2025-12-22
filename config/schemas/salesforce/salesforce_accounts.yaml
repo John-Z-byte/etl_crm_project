@@ -6,8 +6,8 @@ version: "1.0"
 description: "Salesforce accounts export (CSV format)."
 
 file_patterns:
-  - "accounts*.csv"
-  - "account*.csv"
+  - "salesforce_accounts*.csv"
+  - "salesforce_account*.csv"
 
 expected_delimiter: ","
 expected_encoding: "utf-8"

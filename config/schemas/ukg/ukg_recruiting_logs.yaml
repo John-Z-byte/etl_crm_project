@@ -6,8 +6,8 @@ version: "1.0"
 description: "UKG recruiting application step logs (CSV format)."
 
 file_patterns:
-  - "recruiting_logs.csv"
-  - "recruiting_logs*.csv"     # por si algún día incluyen fecha o variación
+  - "ukg_recruiting_logs.csv"
+  - "ukg_recruiting_logs*.csv"     # por si algún día incluyen fecha o variación
 
 expected_delimiter: ","
 expected_encoding: "utf-8"

@@ -6,8 +6,8 @@ version: "1.0"
 description: "Salesforce impressions/activity export (CSV format)."
 
 file_patterns:
-  - "impressions*.csv"
-  - "impression*.csv"       # cubre variaciones menores
+  - "salesforce_impressions*.csv"
+  - "salesforce_impression*.csv"       # cubre variaciones menores
 
 expected_delimiter: ","
 expected_encoding: "utf-8"
