@@ -13,7 +13,6 @@ from src.common.io import safe_read_excel_all_sheets
 from src.common.normalize import to_snake, strip_object_cols
 from src.common.franchises import enrich_franchise_columns
 
-
 # =========================
 # BUSINESS MAPS / RULES
 # =========================
@@ -56,7 +55,6 @@ COLUMN_ORDER = [
     "tags",
 ]
 
-
 # =========================
 # DATATYPES
 # =========================
@@ -67,7 +65,6 @@ class RunResult:
     files_loaded: int
     files_rejected: int
 
-
 # =========================
 # HELPERS
 # =========================
@@ -77,13 +74,11 @@ def _load_schema(schema_path: Path) -> dict:
         raise ValueError("Schema YAML inválido (no es un dict).")
     return data
 
-
 def _match_files(raw_dir: Path, patterns: list[str]) -> list[Path]:
     return sorted(
         p for p in raw_dir.glob("*.xlsx")
         if any(fnmatch.fnmatch(p.name, pat) for pat in patterns)
     )
-
 
 def _write_rejected(rejected_dir: Path, file_path: Path, reason: str) -> None:
     rejected_dir.mkdir(parents=True, exist_ok=True)
@@ -91,7 +86,6 @@ def _write_rejected(rejected_dir: Path, file_path: Path, reason: str) -> None:
     pd.DataFrame([{"source_file": file_path.name, "reason": reason}]).to_csv(
         out, index=False, encoding="utf-8-sig"
     )
-
 
 def _extract_franchise_from_location(df: pd.DataFrame) -> pd.DataFrame:
     # IMPORTANT: Location stays TEXT; we only derive franchise from it.
@@ -107,7 +101,6 @@ def _extract_franchise_from_location(df: pd.DataFrame) -> pd.DataFrame:
     )
     return df
 
-
 def _coerce_bool_nullable(s: pd.Series) -> pd.Series:
     return (
         s.astype(str).str.strip().str.lower()
@@ -120,7 +113,6 @@ def _coerce_bool_nullable(s: pd.Series) -> pd.Series:
         })
         .astype("boolean")
     )
-
 
 def _apply_city_tax(tags: pd.Series, franchise: pd.Series) -> pd.Series:
     def extract_city(tag: str) -> str | None:
@@ -148,7 +140,6 @@ def _apply_city_tax(tags: pd.Series, franchise: pd.Series) -> pd.Series:
         dtype="string",
     )
 
-
 def _fill_state_if_missing(df: pd.DataFrame) -> pd.DataFrame:
     if "state" not in df.columns:
         df["state"] = pd.NA
@@ -161,7 +152,6 @@ def _fill_state_if_missing(df: pd.DataFrame) -> pd.DataFrame:
         df.loc[missing, "state"] = derived.loc[missing]
 
     return df
-
 
 def _make_full_name(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -176,7 +166,6 @@ def _make_full_name(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[df["full_name"].str.lower().isin(["", "nan", "none"]), "full_name"] = pd.NA
     df.drop(columns=["first_name", "last_name"], errors="ignore", inplace=True)
     return df
-
 
 def _report_missing_client_id(df: pd.DataFrame) -> None:
     if "client_id" not in df.columns:
@@ -207,7 +196,6 @@ def _report_missing_client_id(df: pd.DataFrame) -> None:
 
     print(tabulate(view, headers="keys", tablefmt="simple", showindex=False))
 
-
 def _print_output_schema(df: pd.DataFrame, output_path: Path) -> None:
     print("FILE FOUND" if output_path.exists() else "FILE NOT FOUND")
     print(f"TOTAL ROWS: {len(df):,}")
@@ -221,7 +209,6 @@ def _print_output_schema(df: pd.DataFrame, output_path: Path) -> None:
 
     print("OUTPUT SCHEMA")
     print(tabulate(schema_df, headers="keys", tablefmt="pipe", showindex=True))
-
 
 # =========================
 # MAIN ENTRYPOINT
@@ -334,7 +321,6 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
 
     print(f"[LOAD] rows={len(df):,} -> {output_path}")
     return RunResult(output_path, len(df), len(dfs), rejected)
-
 
 if __name__ == "__main__":
     run_wellsky_clients(Path("datalake"))
