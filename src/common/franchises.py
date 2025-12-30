@@ -15,7 +15,12 @@ ACRO_MAP = {
     772: "Fran", 780: "Gad", 827: "Good",
 }
 
-def enrich_franchise_columns(df: pd.DataFrame, franchise_col: str = "franchise") -> pd.DataFrame:
+def enrich_franchise_columns(
+    df: pd.DataFrame,
+    franchise_col: str = "franchise"
+) -> pd.DataFrame:
+    df = df.copy()
     df["franchise_name"] = df[franchise_col].map(NAME_MAP)
     df["franchise_acro"] = df[franchise_col].map(ACRO_MAP)
     return df
+

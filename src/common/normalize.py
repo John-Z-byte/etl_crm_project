@@ -1,51 +1,25 @@
-# src/common/normalize.py
-import numpy as np
+from __future__ import annotations
+import re
 import pandas as pd
-import unicodedata
 
+def to_snake(s: str) -> str:
+    s = str(s).strip().replace("\u00A0", " ")
+    s = re.sub(r"\s+", "_", s)
+    s = s.replace("-", "_").replace("/", "_").replace("*", "")
+    return s.lower()
+
+def strip_object_cols(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.columns = df.columns.astype(str).str.replace("\u00A0", " ").str.strip()
+    for c in df.select_dtypes(include="object").columns:
+        df[c] = df[c].astype(str).str.strip()
+    return df
 
 def normalize_headers(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Normaliza headers del DataFrame a snake_case técnico.
-    Solo afecta nombres de columnas, no valores.
+    Backward-compatible helper used by older modules.
+    Normaliza los headers a snake_case.
     """
     df = df.copy()
-    df.columns = (
-        df.columns
-          .str.strip()
-          .str.lower()
-          .str.replace(" / ", "_", regex=False)
-          .str.replace(" ", "_")
-          .str.replace(r"[^a-z0-9_]", "", regex=True)
-    )
+    df.columns = [to_snake(c) for c in df.columns]
     return df
-
-
-def normalize_name(s: pd.Series) -> pd.Series:
-    """
-    Normaliza texto humano (nombres, etiquetas).
-    NO usar para IDs, fechas, enums o claves técnicas.
-    """
-    s = s.copy()
-    mask = s.notna()
-    s = s.where(mask)
-
-    s.loc[mask] = (
-        s.loc[mask]
-          .astype(str)
-          .str.strip()
-          .str.replace(r"\s+", " ", regex=True)
-          .str.upper()
-    )
-
-    s.loc[mask] = s.loc[mask].apply(
-        lambda x: unicodedata.normalize("NFKD", x)
-        .encode("ascii", "ignore")
-        .decode("ascii")
-    )
-
-    garbage_mask = s.loc[mask].str.fullmatch(r"[-_.]+")
-    s.loc[mask] = s.loc[mask].where(~garbage_mask, np.nan)
-
-    s = s.replace({"": np.nan})
-    return s
