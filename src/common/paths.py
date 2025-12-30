@@ -2,20 +2,32 @@
 from pathlib import Path
 
 def project_root() -> Path:
-    # .../etl_crm_project/src/common/paths.py -> subir 2 niveles
     return Path(__file__).resolve().parents[2]
 
-def raw_dir(source: str, dataset: str) -> Path:
-    return project_root() / "datalake" / "raw" / source / dataset
+# ---------- RAW ----------
+def raw_source_dir(source: str) -> Path:
+    return project_root() / "datalake" / "raw" / source
 
-def processed_dir(source: str, dataset: str) -> Path:
-    return project_root() / "datalake" / "processed" / source / dataset
+def raw_dataset_dir(source: str, dataset: str) -> Path:
+    return raw_source_dir(source) / dataset
 
-def rejected_dir(source: str, dataset: str) -> Path:
-    return project_root() / "datalake" / "rejected" / source / dataset
 
-def schemas_dir(source: str) -> Path:
-    return project_root() / "config" / "schemas" / source
-
+# ---------- PROCESSED ----------
 def processed_source_dir(source: str) -> Path:
     return project_root() / "datalake" / "processed" / source
+
+def processed_dataset_dir(source: str, dataset: str) -> Path:
+    return processed_source_dir(source) / dataset
+
+
+# ---------- REJECTED ----------
+def rejected_source_dir(source: str) -> Path:
+    return project_root() / "datalake" / "rejected" / source
+
+def rejected_dataset_dir(source: str, dataset: str) -> Path:
+    return rejected_source_dir(source) / dataset
+
+
+# ---------- SCHEMAS ----------
+def schemas_dir(source: str) -> Path:
+    return project_root() / "config" / "schemas" / source
