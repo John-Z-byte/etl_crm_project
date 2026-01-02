@@ -74,11 +74,17 @@ def _load_schema(schema_path: Path) -> dict:
         raise ValueError("Schema YAML inválido (no es un dict).")
     return data
 
+
 def _match_files(raw_dir: Path, patterns: list[str]) -> list[Path]:
-    return sorted(
-        p for p in raw_dir.glob("*.xlsx")
-        if any(fnmatch.fnmatch(p.name, pat) for pat in patterns)
-    )
+    """
+    Match files based on schema patterns (supports .xlsx and .xls etc).
+    """
+    files: list[Path] = []
+    for pat in patterns or ["*.xlsx"]:
+        files.extend(raw_dir.glob(pat))
+    # de-dupe + stable sort
+    return sorted({p.resolve() for p in files})
+
 
 def _write_rejected(rejected_dir: Path, file_path: Path, reason: str) -> None:
     rejected_dir.mkdir(parents=True, exist_ok=True)
@@ -87,23 +93,36 @@ def _write_rejected(rejected_dir: Path, file_path: Path, reason: str) -> None:
         out, index=False, encoding="utf-8-sig"
     )
 
+
 def _extract_franchise_from_location(df: pd.DataFrame) -> pd.DataFrame:
-    # IMPORTANT: Location stays TEXT; we only derive franchise from it.
-    if "Location" not in df.columns:
+    """
+    Derive franchise from a location-like column.
+
+    Expectation after to_snake(): one of:
+      - location
+      - client_location
+    """
+    if "location" in df.columns:
+        col = "location"
+    elif "client_location" in df.columns:
+        col = "client_location"
+    else:
         return df
 
     df = df.copy()
     df["franchise"] = (
-        df["Location"]
-        .astype(str)
+        df[col]
+        .astype("string")
+        .str.strip()
         .str.extract(r"(\d{3})", expand=False)
         .astype("Int64")
     )
     return df
 
+
 def _coerce_bool_nullable(s: pd.Series) -> pd.Series:
     return (
-        s.astype(str).str.strip().str.lower()
+        s.astype("string").str.strip().str.lower()
         .map({
             "true": True, "false": False,
             "1": True, "0": False,
@@ -113,6 +132,7 @@ def _coerce_bool_nullable(s: pd.Series) -> pd.Series:
         })
         .astype("boolean")
     )
+
 
 def _apply_city_tax(tags: pd.Series, franchise: pd.Series) -> pd.Series:
     def extract_city(tag: str) -> str | None:
@@ -133,18 +153,21 @@ def _apply_city_tax(tags: pd.Series, franchise: pd.Series) -> pd.Series:
             return "Tax None"
         return city
 
-    extracted = tags.astype(str).apply(extract_city)
-    frs = franchise.astype(str)
+    extracted = tags.astype("string").apply(extract_city)
+    frs = franchise.astype("string")
     return pd.Series(
-        [rule(extracted.iat[i], frs.iat[i]) for i in range(len(extracted))],
+        [rule(extracted.iat[i], str(frs.iat[i])) for i in range(len(extracted))],
         dtype="string",
     )
 
+
 def _fill_state_if_missing(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
     if "state" not in df.columns:
         df["state"] = pd.NA
 
-    s = df["state"].astype(str).str.strip()
+    s = df["state"].astype("string").str.strip()
     missing = df["state"].isna() | s.eq("") | s.str.lower().isin({"nan", "none"})
 
     if missing.any() and "franchise_name" in df.columns:
@@ -153,26 +176,26 @@ def _fill_state_if_missing(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
 def _make_full_name(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    df["full_name"] = (
-        df.get("first_name", pd.Series([""] * len(df)))
-          .astype(str).str.strip()
-        + " "
-        + df.get("last_name", pd.Series([""] * len(df)))
-          .astype(str).str.strip()
-    ).str.replace(r"\s+", " ", regex=True).str.strip()
 
+    first = df.get("first_name", pd.Series([""] * len(df))).astype("string").fillna("").str.strip()
+    last = df.get("last_name", pd.Series([""] * len(df))).astype("string").fillna("").str.strip()
+
+    df["full_name"] = (first + " " + last).str.replace(r"\s+", " ", regex=True).str.strip()
     df.loc[df["full_name"].str.lower().isin(["", "nan", "none"]), "full_name"] = pd.NA
+
     df.drop(columns=["first_name", "last_name"], errors="ignore", inplace=True)
     return df
+
 
 def _report_missing_client_id(df: pd.DataFrame) -> None:
     if "client_id" not in df.columns:
         print("[QUALITY] Missing client_id column entirely.")
         return
 
-    cid = df["client_id"].astype(str).str.strip()
+    cid = df["client_id"].astype("string").str.strip()
     miss = df["client_id"].isna() | cid.eq("") | cid.str.lower().isin({"nan", "none"})
     missing_df = df.loc[miss].copy()
 
@@ -193,8 +216,8 @@ def _report_missing_client_id(df: pd.DataFrame) -> None:
         rename["full_name"] = "Full Name"
 
     view = missing_df[cols].rename(columns=rename)
-
     print(tabulate(view, headers="keys", tablefmt="simple", showindex=False))
+
 
 def _print_output_schema(df: pd.DataFrame, output_path: Path) -> None:
     print("FILE FOUND" if output_path.exists() else "FILE NOT FOUND")
@@ -223,12 +246,15 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
 
     today = pd.Timestamp(as_of).normalize() if as_of else pd.Timestamp.today().normalize()
 
-    files = _match_files(raw_dir, schema.get("file_patterns", ["*.xlsx"]))
+    patterns = schema.get("file_patterns", ["*.xlsx", "*.xls"])
+    files = _match_files(raw_dir, patterns)
     if not files:
         raise FileNotFoundError(f"No input Excel files found in {raw_dir}")
 
     dfs: list[pd.DataFrame] = []
     rejected = 0
+
+    required = schema.get("required_columns", []) or []
 
     for p in files:
         df_part, error = safe_read_excel_all_sheets(p)
@@ -243,7 +269,8 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
 
         df_part = strip_object_cols(df_part)
 
-        missing = [c for c in schema["required_columns"] if c not in df_part.columns]
+        # validate required columns (before snake_case)
+        missing = [c for c in required if c not in df_part.columns]
         if missing:
             rejected += 1
             _write_rejected(rejected_dir, p, f"Missing required columns: {missing}")
@@ -257,19 +284,25 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
     df = pd.concat(dfs, ignore_index=True)
 
     # ---- Transformations ----
-    df = _extract_franchise_from_location(df)
 
-    # normalize headers to snake_case (passthrough output)
+    # normalize headers to snake_case
     df.columns = [to_snake(c) for c in df.columns]
 
-    # Ensure location stays TEXT
+    # derive franchise from location-like field (after snake_case)
+    df = _extract_franchise_from_location(df)
+
+    # Ensure location stays TEXT (avoid "nan" strings)
     if "location" in df.columns:
-        df["location"] = df["location"].astype(str)
+        df["location"] = df["location"].astype("string")
+
+    # client_id as nullable int (avoid float64)
+    if "client_id" in df.columns:
+        df["client_id"] = pd.to_numeric(df["client_id"], errors="coerce").astype("Int64")
 
     # full_name (and drop first/last)
     df = _make_full_name(df)
 
-    # enrich franchise_name / franchise_acro (common)
+    # enrich franchise_name / franchise_acro
     if "franchise" in df.columns:
         df = enrich_franchise_columns(df, franchise_col="franchise")
 
@@ -309,7 +342,8 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
     df = _fill_state_if_missing(df)
 
     # ---- Final output ----
-    df = df[[c for c in COLUMN_ORDER if c in df.columns]]
+    final_cols = [c for c in COLUMN_ORDER if c in df.columns]
+    df = df[final_cols].copy()
 
     output_path = processed_dir / "wellsky_clients.csv"
     df.to_csv(output_path, index=False, encoding="utf-8-sig")
@@ -320,6 +354,7 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
 
     print(f"[LOAD] rows={len(df):,} -> {output_path}")
     return RunResult(output_path, len(df), len(dfs), rejected)
+
 
 if __name__ == "__main__":
     run_wellsky_clients(Path("datalake"))

@@ -7,7 +7,6 @@ from typing import Any, Iterable
 
 import pandas as pd
 import yaml
-from tabulate import tabulate
 
 from src.common.normalize import normalize_headers
 from src.common.franchises import enrich_franchise_columns
@@ -22,11 +21,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _norm_col(name: str) -> str:
-    """
-    Convert schema column labels (often Title Case w/ spaces) into
-    the same style that normalize_headers produces.
-    """
-    # normalize_headers already exists; we just need a deterministic approximation
     s = str(name).strip().lower()
     out = []
     prev_us = False
@@ -72,7 +66,6 @@ def _find_files(folders: Iterable[Path], patterns: list[str]) -> list[Path]:
             continue
         for pat in patterns:
             files.extend(sorted(folder.glob(pat)))
-    # de-dupe preserve order
     seen: set[Path] = set()
     out: list[Path] = []
     for f in files:
@@ -105,10 +98,6 @@ def read_concat_excels(
 # Franchise handling
 # -------------------------
 def derive_franchise_left3(df: pd.DataFrame, source_col: str) -> pd.DataFrame:
-    """
-    franchise = VALUE(LEFT(source_col, 3))
-    Assumes franchise id is always 3 digits.
-    """
     if source_col not in df.columns:
         return df
 
@@ -138,13 +127,11 @@ def _order_franchise_first(df: pd.DataFrame, schema_cols: list[str]) -> pd.DataF
 def run_wellsky_job(
     *,
     in_folders: list[Path],
-    out_path: Path,
     schema_path: Path,
-    franchise_source_col: str,  # e.g. "location" or "client_location"
+    franchise_source_col: str,
     sheet_name: str | int | None = 0,
     drop_unmapped_franchise: bool = True,
-) -> None:
-    out_path = Path(out_path)
+) -> pd.DataFrame:
     schema = load_wellsky_schema(Path(schema_path))
 
     df = read_concat_excels(in_folders, patterns=schema.file_patterns, sheet_name=sheet_name)
@@ -152,19 +139,17 @@ def run_wellsky_job(
         print("FILE NOT FOUND")
         for p in in_folders:
             print(f"Path: {p}")
-        return
+        return pd.DataFrame()
 
-    # Validate required columns exist (post-normalization)
     missing = [c for c in schema.required if c not in df.columns]
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
 
-    # Derive franchise from LEFT(3) and enrich
     df = derive_franchise_left3(df, franchise_source_col)
+
     if "franchise" in df.columns:
         df = enrich_franchise_columns(df, franchise_col="franchise")
 
-        # keep only mapped franchises
         if drop_unmapped_franchise and {"franchise_name", "franchise_acro"}.issubset(df.columns):
             df = df[
                 df["franchise"].notna()
@@ -172,23 +157,9 @@ def run_wellsky_job(
                 & df["franchise_acro"].notna()
             ].copy()
 
-    # Select ONLY schema columns (required + optional) plus franchise trio
     schema_cols = schema.required + schema.optional
     wanted = ["franchise", "franchise_name", "franchise_acro"] + schema_cols
     df = _select_schema_columns_only(df, wanted)
-
-    # Order columns starting with franchise trio
     df = _order_franchise_first(df, wanted)
 
-    # Write + print schema
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(out_path, index=False)
-
-    print("FILE FOUND")
-    print(f"TOTAL ROWS: {df.shape[0]:,}")
-    print(f"TOTAL COLS: {df.shape[1]:,}")
-    print(f"OUTPUT: {out_path}")
-
-    schema_df = pd.DataFrame({"column": df.columns, "dtype": [str(df[c].dtype) for c in df.columns]})
-    print("\nOUTPUT SCHEMA")
-    print(tabulate(schema_df, headers="keys", tablefmt="github", showindex=True))
+    return df
