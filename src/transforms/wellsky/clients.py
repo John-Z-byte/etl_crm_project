@@ -308,15 +308,14 @@ def run_wellsky_clients(datalake_dir: Path, as_of: str | None = None) -> RunResu
     # state: keep input, fill if missing
     df = _fill_state_if_missing(df)
 
-    # Console QA
-    _report_missing_client_id(df)
-
     # ---- Final output ----
     df = df[[c for c in COLUMN_ORDER if c in df.columns]]
 
     output_path = processed_dir / "wellsky_clients.csv"
     df.to_csv(output_path, index=False, encoding="utf-8-sig")
 
+    # Console QA
+    _report_missing_client_id(df)
     _print_output_schema(df, output_path)
 
     print(f"[LOAD] rows={len(df):,} -> {output_path}")

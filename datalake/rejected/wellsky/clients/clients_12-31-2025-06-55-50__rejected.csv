@@ -1,0 +1,2 @@
+﻿source_file,reason
+clients_12-31-2025-06-55-50.xlsx,ImportError: Missing optional dependency 'openpyxl'.  Use pip or conda to install openpyxl.
